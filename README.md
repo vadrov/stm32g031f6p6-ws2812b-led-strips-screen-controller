@@ -27,7 +27,7 @@ ffmpeg -i %8d.bmp -r 25 -vcodec bmp video.avi
 -vcodec bmp - используется кодек bmp (указание на то, что используются несжатые данные RGB);
 video.avi - название выходного (целевого) файла.
 ```
-Другой способ получения требуемого формата изображения для LED-контроллера и крана заключается в конвертации любого видеофайла той же библиотекой ffmpeg. Например:
+Другой способ получения требуемого формата изображения для LED-контроллера и экрана заключается в конвертации любого видеофайла той же библиотекой ffmpeg. Например:
 ```
 ffmpeg -i file.mp4 -r 25 -vcodec bmp -s 60x20 video.avi
 где:
@@ -47,7 +47,7 @@ Where:
 -vcodec bmp - bmp codec is used (indicating that uncompressed RGB data is used);
 video.avi - name of the output (target) file.
 ```
-Another way to get the required image format for the LED controller and faucet is to convert any video file with the same ffmpeg library. For example:
+Another way to get the required image format for the LED controller and screen is to convert any video file with the same ffmpeg library. For example:
 ```
 ffmpeg -i file.mp4 -r 25 -vcodec bmp -s 60x20 video.avi
 Where:
