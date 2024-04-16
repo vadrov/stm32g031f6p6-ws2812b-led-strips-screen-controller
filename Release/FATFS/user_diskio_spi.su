@@ -1,0 +1,9 @@
+../FATFS/user_diskio_spi.c:128:13:SPI_DMA_TransmitReceive	32	static
+../FATFS/user_diskio_spi.c:340:16:rcvr_datablock	32	static
+../FATFS/user_diskio_spi.c:413:16:xmit_datablock	32	static
+../FATFS/user_diskio_spi.c:218:13:send_cmd	32	static
+../FATFS/user_diskio_spi.c:257:9:USER_SPI_initialize	40	static
+../FATFS/user_diskio_spi.c:334:9:USER_SPI_status	0	static
+../FATFS/user_diskio_spi.c:380:9:USER_SPI_read	40	static
+../FATFS/user_diskio_spi.c:449:9:USER_SPI_write	32	static
+../FATFS/user_diskio_spi.c:482:9:USER_SPI_ioctl	48	static

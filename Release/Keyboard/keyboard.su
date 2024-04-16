@@ -1,0 +1,2 @@
+../Keyboard/keyboard.c:140:10:KEYB_Inkeys	24	static
+../Keyboard/keyboard.c:169:9:KEYB_kbhit	0	static
