@@ -1,2 +1,2 @@
 ../AVI/avi.c:18:9:LED_Load_BMP	128	dynamic
-../AVI/avi.c:62:6:PlayAVI	136	static
+../AVI/avi.c:62:5:PlayAVI	136	static

@@ -30,7 +30,7 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
-extern uint32_t millis; //счетчик системного времени, мс
+extern volatile uint32_t millis; //счетчик системного времени, мс
 extern ENCODER_Handler encoder1; //обработчик энкодера
 
 //Обработка событий энкодера с эмуляцией нажатия кнопок для модуля Keyboard

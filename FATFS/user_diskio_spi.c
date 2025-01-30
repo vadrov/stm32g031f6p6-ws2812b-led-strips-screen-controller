@@ -17,7 +17,7 @@
  *  Portions copyright (C) 2019, VadRov, all right reserved.
  *  низкоуровневый драйвер для работы с SD картой по SPI, в том числе, с DMA
  *  Модифицировано: 2019, VadRov
- *  версия 1.1 (NO_HAL)
+ *  версия 1.1
  *  для м/к STM32G0x1
  *
  *  https://dzen.ru/vadrov
@@ -29,9 +29,9 @@
 #include "user_diskio_spi.h"
 #include "main.h"
 
-extern uint32_t millis; //Счетчик миллисекунд. Эта переменная должна увеличиваться на 1
-						//каждую миллисекунду, например, в прерывании системного таймера
-						//SysTick
+extern volatile uint32_t millis; //Счетчик миллисекунд. Эта переменная должна увеличиваться на 1
+								 //каждую миллисекунду, например, в прерывании системного таймера
+								 //SysTick
 
 //-------------------------------- Настройки SPI и DMA ----------------------------
 #define SPI_SD				SPI2 	//SPI, к которому подключена карта
@@ -97,18 +97,19 @@ extern uint32_t millis; //Счетчик миллисекунд. Эта пере
 //speed от 0 (FCLK/2) до 7 (FCLK/256)
 static void set_sd_interface_speed(uint8_t speed)
 {
-	if (speed > 7) speed = 7;
+	speed &= 7;
 	SPI_SD->CR1 &= ~SPI_CR1_SPE; //SPI отключено
 	SPI_SD->CR1 &= ~SPI_CR1_BR_Msk; //маска скорости
-	SPI_SD->CR1 |= (uint32_t)(speed<<(SPI_CR1_BR_Pos)); //установка скорости
+	SPI_SD->CR1 |= (uint32_t)(speed << SPI_CR1_BR_Pos); //установка скорости
 	SPI_SD->CR1 |= SPI_CR1_SPE; // SPI включено
 }
 
 static BYTE spi_rw(BYTE wval)
 {
+	while (!(SPI_SD->SR & SPI_SR_TXE)) { ; }
 	*((volatile uint8_t *)&SPI_SD->DR) = wval;
-	while(!(SPI_SD->SR & SPI_SR_RXNE)) ;
-	while (SPI_SD->SR & SPI_SR_BSY) ;
+	while(!(SPI_SD->SR & SPI_SR_RXNE)) { ; }
+	while (SPI_SD->SR & SPI_SR_BSY) { ; }
 	return *((volatile uint8_t *)&SPI_SD->DR);
 }
 
@@ -186,13 +187,14 @@ static void spi_r_multi(BYTE *rval, uint16_t cnt)
 
 	while(txCnt > 0)
 	{
+		while (!(SPI_SD->SR & SPI_SR_TXE)) { ; }
 		*((volatile uint8_t *)&SPI_SD->DR) = 0xFF;
 		txCnt--;
-		while(!(SPI_SD->SR & SPI_SR_RXNE));
+		while(!(SPI_SD->SR & SPI_SR_RXNE)) { ; }
 		*pRxData = *((volatile uint8_t *)&SPI_SD->DR);
 		pRxData++;
 	}
-	while (SPI_SD->SR & SPI_SR_BSY) ;
+	while (SPI_SD->SR & SPI_SR_BSY) { ; }
 }
 #endif // SD_USE_DMA
 

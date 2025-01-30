@@ -350,7 +350,8 @@ int main(void)
 	//------------------------------- Создание LED устройства ----------------------------------
 	//Создание LED портов с учетом возможностей периферии (наличие свободных таймеров с каналами PWM DMA)
 	LED_Port *ports = LED_AddNewPort(0, 1200, TIM1, LL_TIM_CHANNEL_CH4, DMA1, LL_DMA_CHANNEL_4);
-	LED_Handler *led = LED_CreateDevice(LED_LEFTtoRIGHT_UPtoDOWN, 60, 255, ports);
+	//LED_Handler *led = LED_CreateDevice(LED_LEFTtoRIGHT_UPtoDOWN, 60, 255, ports);
+	LED_Handler *led = LED_CreateDevice(LED_DOWNtoUP_LEFTtoRIGHT, 60, 63, ports);
 	if (!led) {
 		LCD_WriteString(lcd, 0, lcd->AtPos.y, "Error! Failed to create device!", &FONT_DEFAULT, COLOR_RED, COLOR_BLACK, LCD_SYMBOL_PRINT_FAST);
 		while (1) ;
@@ -370,7 +371,9 @@ int main(void)
 		fm->Show(fm);
 		/* Проверка статуса завершения работы менеджера файлов */
 		if (fm->GetStatus(fm) == File_Manager_OK) { /* Завершение без ошибок с выбором файла? */
-			PlayAVI(fm->GetFilePath(fm), fm->GetFileName(fm), led, 0, 0, led->width, led->height);
+			LCD_SleepIn(lcd);
+			while (!PlayAVI(fm->GetFilePath(fm), fm->GetFileName(fm), led, 0, 0, led->width, led->height)) { ; }
+			LCD_SleepOut(lcd);
 		}
 		else {
 			/* Выводим сообщение, что работа файлового менеджера завершена с ошибкой */

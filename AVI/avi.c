@@ -59,7 +59,7 @@ uint8_t LED_Load_BMP (LED_Handler *led, uint16_t x, uint16_t y, uint16_t w, uint
 	return 0; //успешное завершение
 }
 
-void PlayAVI(char *dir, char *fname, LED_Handler *led, uint16_t x, uint16_t y, uint16_t win_wdt, uint16_t win_hgt)
+int PlayAVI(char *dir, char *fname, LED_Handler *led, uint16_t x, uint16_t y, uint16_t win_wdt, uint16_t win_hgt)
 {
 	FIL file; //Файловый объект
 	//"Склеим" путь до файла с именем файла
@@ -70,21 +70,21 @@ void PlayAVI(char *dir, char *fname, LED_Handler *led, uint16_t x, uint16_t y, u
 	//Откроем файл для чтения (FA_READ) с проверкой на ошибку при открытии res
 	FRESULT res = f_open(&file, tmp, FA_READ);
 	free(tmp);
-	if (res != FR_OK) return; //Ошибка открытия файла
+	if (res != FR_OK) return 1; //Ошибка открытия файла
 	RiffHDR *RHdr = calloc(1, sizeof(RiffHDR)); //Объявим обработчик riff
 	//Теперь проверим, а дествительно ли это AVI файл. Если это он, то считаем все необходимые для
 	//воспроизведения параметры
 	if (Read_RIFF_Header(RHdr, &file) != RIFF_OK) {
 		free(RHdr);
 		f_close(&file);
-		return;
+		return 2;
 	}
 	if (RHdr->mediaType != FourccType_AVI ||
 		RHdr->vidFmt.biCompression != 0x00000000) { //AVI с кадрами без сжатия (BI_RGB)
 		if (RHdr->AVIStreams) free(RHdr->AVIStreams);
 		free(RHdr);
 		f_close(&file);
-		return;
+		return 3;
 	}
 	//Указатель чтения файла перемещаем на первый кадр данных
 	f_lseek(&file, RHdr->startPosData);
@@ -137,7 +137,12 @@ void PlayAVI(char *dir, char *fname, LED_Handler *led, uint16_t x, uint16_t y, u
 		if (KEYB_kbhit()) {
 			uint16_t keys = KEYB_Inkeys();	//Считываем ключи "кнопок"-событий энкодера.
 			if (keys & (1 << KEYB_LEFT)) {	//Удержание кнопки -> принудительное завершение воспроизведения.
-				break;
+				f_close(&file); //Закрываем файл
+				//"Гасим" изображение на устройстве
+				LED_DeviceWaitUpdate(led); 	//Ожидаем завершения обновления данных на устройстве
+				LED_FillColor(led, 0);		//Задаем 0 цвет всем компонентам
+				LED_DeviceUpdate(led);		//Разрешаем обновление данных на устройстве
+				return 4;
 			}
 			if (keys & (1 << KEYB_DOWN)) {   //Увеличение яркости устройства.
 				if (led->bright < 255) {
@@ -164,4 +169,5 @@ void PlayAVI(char *dir, char *fname, LED_Handler *led, uint16_t x, uint16_t y, u
 	LED_DeviceWaitUpdate(led); 	//Ожидаем завершения обновления данных на устройстве
 	LED_FillColor(led, 0);		//Задаем 0 цвет всем компонентам
 	LED_DeviceUpdate(led);		//Разрешаем обновление данных на устройстве
+	return 0;
 }
